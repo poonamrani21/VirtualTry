@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout tools:context=".presentation.dashboard.MainActivity"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/FrameContainer_fit_preview"
+    android:background="@android:color/black"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+     <!--   <View
+            android:background="@color/white"
+            android:id="@+id/outside_detector"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"/>-->
+        <com.infostride.virtualtryon.presentation.ui.AutoFitFrameLayout
+            android:id="@+id/autofitFrameLayout_fit_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.infostride.virtualtryon.presentation.ui.AutoFitTextureView
+                android:id="@+id/autoFitTextureView_fit_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <com.infostride.virtualtryon.presentation.ui.DrawView
+                android:id="@+id/drawView_fit_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </com.infostride.virtualtryon.presentation.ui.AutoFitFrameLayout>
+
+        <LinearLayout
+            android:background="@color/black"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/ll_select_outfit"
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:layout_height="match_parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/tv_outfit_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/select_outfit"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toTopOf="@+id/rv_costume_type"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_costume_type"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_outfit_label"
+                        tools:listitem="@layout/costumer_option_item_layout" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btn_upload_outfit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#9C9292"
+                        android:text="@string/select_outfit"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <View
+                android:id="@+id/outside_detector"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"/>
+<!--
+            <com.infostride.virtualtryon.presentation.ui.AutoFitFrameLayout
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="match_parent">
+
+                <com.infostride.virtualtryon.presentation.ui.AutoFitTextureView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <com.infostride.virtualtryon.presentation.ui.DrawView
+                    android:id="@+id/drawView_fit_preview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </com.infostride.virtualtryon.presentation.ui.AutoFitFrameLayout>
+-->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_costume"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/costumer_item_layout"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</FrameLayout>
