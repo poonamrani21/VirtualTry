@@ -48,6 +48,8 @@ import java.util.concurrent.TimeUnit;
 * detects certain points on users body and place the outfit on user
 * by using these points.
 * */
+
+// TODO: 09/02/23 file need to update 
 public class PreviewManager extends Fragment
 {
     private final String TAG = "C-PREVIEWMANAGER: "; //log TAG
