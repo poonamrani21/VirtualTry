@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment
 import com.infostride.virtualtryon.R
 import java.util.concurrent.Semaphore
 import kotlin.math.max
+// TODO: 09/02/23 file need to update
 
 class PreviewCamera : Fragment(){
     private var autoFitTextureView: AutoFitTextureView? = null
