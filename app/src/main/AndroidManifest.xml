@@ -8,7 +8,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--If in Android 10 (API 29) you are also not using requestLegacyExternalStorage then set maxSdkVersion to 28 instead of 29.-->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29"
+        tools:ignore="ScopedStorage" />
 
     <application
         android:name=".base.BaseApplication"
@@ -31,7 +35,6 @@
             android:exported="false" />
         <activity
             android:name=".presentation.splash.SplashActivity"
-            android:theme="@style/Theme.CustomSplashScreenTheme"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
