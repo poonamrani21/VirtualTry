@@ -13,8 +13,7 @@ import com.infostride.virtualtryon.domain.model.CostumeDetails
 /****
  * Created by poonam Rani on 23 Jan 2023
  */
-class CostumeListAdapter(private val costumeList:ArrayList<CostumeDetails>,private val onItemClick:(CostumeDetails, ImageView) -> Unit):
-    RecyclerView.Adapter<CostumeListAdapter.CostumeViewListViewHolder>() {
+class CostumeListAdapter(private val costumeList:ArrayList<CostumeDetails>,private val onItemClick:(CostumeDetails) -> Unit): RecyclerView.Adapter<CostumeListAdapter.CostumeViewListViewHolder>() {
 
     inner class CostumeViewListViewHolder(val binding: CostumerItemLayoutBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -33,7 +32,7 @@ class CostumeListAdapter(private val costumeList:ArrayList<CostumeDetails>,priva
                 crossfade(true)
                 placeholder(R.mipmap.ic_launcher)
             }
-            ivCostume.setOnClickListener { onItemClick(this,ivCostume) }
+            ivCostume.setOnClickListener { onItemClick(this) }
         }
        }
     }
