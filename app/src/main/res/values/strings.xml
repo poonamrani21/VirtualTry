@@ -16,12 +16,12 @@
     <string name="upload_your_outfit">Upload Outfit</string>
 
     <string-array name="men_costume_type">
-    <item>Tops</item>
-    <item>Long Wears</item>
-    <item>Trousers</item>
-    <item>Shorts</item>
+        <item>Tops</item>
+        <item>Long Wears</item>
+        <item>Trousers</item>
+        <item>Shorts</item>
 
-</string-array>
+    </string-array>
 
     <string name="permission_required"> access is required to display the camera preview.</string>
     <string name="ok">OK</string>

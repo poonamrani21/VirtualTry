@@ -42,27 +42,19 @@ class Classifier(activity: Activity) {
     //Constructor
     init {
         tflite = Interpreter(loadModelFile(activity))
-        imgData = ByteBuffer.allocateDirect(
-            DIM_BATCH_SIZE
-                    * DIM_PIXEL_SIZE
-                    * imageSizeX
-                    * imageSizeY
-                    * numBytesPerChannel
-        )
+        imgData = ByteBuffer.allocateDirect(DIM_BATCH_SIZE * DIM_PIXEL_SIZE * imageSizeX * imageSizeY * numBytesPerChannel)
         imgData!!.order(ByteOrder.nativeOrder())
         Log.d(TAG, " classifier has created.")
     } //End constructor
 
     //Load model file
+    /** Preload and memory map the model file, returning a MappedByteBuffer containing the model. */
     @Throws(IOException::class)
     private fun loadModelFile(activity: Activity): MappedByteBuffer {
         val fileDescriptor = activity.assets.openFd(modelPath)
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-        val fileChannel = inputStream.channel
-        val startOffset = fileDescriptor.startOffset
-        val declaredLength = fileDescriptor.declaredLength
         Log.d(TAG, " model file loaded. . .")
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+        return inputStream.channel.map(FileChannel.MapMode.READ_ONLY, fileDescriptor.startOffset, fileDescriptor.declaredLength)
     } //End loadModelFile
 
     fun classifyFrame(bitmap: Bitmap) {
@@ -81,19 +73,13 @@ class Classifier(activity: Activity) {
             return
         } //do nothing
         imgData!!.rewind()
-        bitmap.getPixels(
-            intValues, 0,
-            bitmap.width,
-            0, 0,
-            bitmap.width,
-            bitmap.height
-        )
+        bitmap.getPixels(intValues, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
         var pixel = 0 //as counter
         for (i in 0 until imageSizeX) {
             for (j in 0 until imageSizeY) {
                 val value = intValues[pixel++]
                 imgData!!.putFloat((value and 0xFF).toFloat()) //B
-                imgData!!.putFloat((value shr 8 and 0xFF).toFloat()) //G;
+                imgData!!.putFloat((value shr 8 and 0xFF).toFloat()) //G
                 imgData!!.putFloat((value shr 16 and 0xFF).toFloat()) //R
             }
         }

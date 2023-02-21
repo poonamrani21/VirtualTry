@@ -21,14 +21,9 @@ class DrawView : View {
     private val TAG = "C-DRAWVIEW: "
 
     //Constructors
-    constructor(context: Context?) : super(context) {}
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
-    ) {
-    }
+    constructor(context: Context?) : super(context)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     fun setImgSize(width: Int, height: Int) {
         mImgWidth = width
@@ -63,64 +58,36 @@ class DrawView : View {
         mPaint.flags = Paint.ANTI_ALIAS_FLAG or Paint.DITHER_FLAG
         mPaint.style = Paint.Style.FILL
         mPaint.strokeWidth = dipToFloat(2f)
-        val outfit_byte_array = currentOutfit!!.image
-        val outfit_bmp = BitmapFactory.decodeByteArray(
-            outfit_byte_array,
-            0, outfit_byte_array.size
-        )
-
+        val outfitByteArray = currentOutfit!!.image
+        val outfitBmp = BitmapFactory.decodeByteArray(outfitByteArray, 0, outfitByteArray.size)
         //Coordinates to fit "TOP" outfit
-        val top_left =
-            (mDrawPoint[2].x - 60).toInt() //The X coordinate of the left side of the rectangle
+        val top_left = (mDrawPoint[2].x - 60).toInt() //The X coordinate of the left side of the rectangle
         val top_top = (mDrawPoint[1].y - 10).toInt() //The Y coordinate of the top of the rectangle
-        val top_right =
-            (mDrawPoint[5].x + 60).toInt() //The X coordinate of the right side of the rectangle
-        val top_bottom =
-            (mDrawPoint[8].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
-        val rect_top = Rect(top_left, top_top, top_right, top_bottom)
-        //Coordinates to fit "LONG WEAR" outfit
-        val long_left =
-            (mDrawPoint[2].x - 60).toInt() //The X coordinate of the left side of the rectangle
+        val top_right = (mDrawPoint[5].x + 60).toInt() //The X coordinate of the right side of the rectangle
+        val top_bottom = (mDrawPoint[8].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
+        val rect_top = Rect(top_left, top_top, top_right, top_bottom) //Coordinates to fit "LONG WEAR" outfit
+        val long_left = (mDrawPoint[2].x - 60).toInt() //The X coordinate of the left side of the rectangle
         val long_top = (mDrawPoint[1].y - 10).toInt() //The Y coordinate of the top of the rectangle
-        val long_right =
-            (mDrawPoint[5].x + 60).toInt() //The X coordinate of the right side of the rectangle
-        val long_bottom =
-            (mDrawPoint[9].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
-        val rect_long = Rect(long_left, long_top, long_right, long_bottom)
-        //Coordinates to fit "TROUSERS" outfit
-        val trousers_left =
-            (mDrawPoint[8].x - 60).toInt() //The X coordinate of the left side of the rectangle
-        val trousers_top =
-            (mDrawPoint[8].y - 10).toInt() //The Y coordinate of the top of the rectangle
-        val trousers_right =
-            (mDrawPoint[11].x + 60).toInt() //The X coordinate of the right side of the rectangle
-        val trousers_bottom =
-            (mDrawPoint[10].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
-        val rect_trousers = Rect(trousers_left, trousers_top, trousers_right, trousers_bottom)
-        //Coordinates to fit "SHORTS N SKIRTS" outfit
-        val short_left =
-            (mDrawPoint[8].x - 60).toInt() //The X coordinate of the left side of the rectangle
-        val short_top =
-            (mDrawPoint[8].y - 10).toInt() //The Y coordinate of the top of the rectangle
-        val short_right =
-            (mDrawPoint[11].x + 60).toInt() //The X coordinate of the right side of the rectangle
-        val short_bottom =
-            (mDrawPoint[9].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
+        val long_right = (mDrawPoint[5].x + 60).toInt() //The X coordinate of the right side of the rectangle
+        val long_bottom = (mDrawPoint[9].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
+        val rect_long = Rect(long_left, long_top, long_right, long_bottom) //Coordinates to fit "TROUSERS" outfit
+        val trousers_left = (mDrawPoint[8].x - 60).toInt() //The X coordinate of the left side of the rectangle
+        val trousers_top = (mDrawPoint[8].y - 10).toInt() //The Y coordinate of the top of the rectangle
+        val trousers_right = (mDrawPoint[11].x + 60).toInt() //The X coordinate of the right side of the rectangle
+        val trousers_bottom = (mDrawPoint[10].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
+        val rect_trousers = Rect(trousers_left, trousers_top, trousers_right, trousers_bottom) //Coordinates to fit "SHORTS N SKIRTS" outfit
+        val short_left = (mDrawPoint[8].x - 60).toInt() //The X coordinate of the left side of the rectangle
+        val short_top = (mDrawPoint[8].y - 10).toInt() //The Y coordinate of the top of the rectangle
+        val short_right = (mDrawPoint[11].x + 60).toInt() //The X coordinate of the right side of the rectangle
+        val short_bottom = (mDrawPoint[9].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
         val rect_short = Rect(short_left, short_top, short_right, short_bottom)
+
         var dst_rect = rect_top
-        if (currentOutfit!!.category == "top") {
-            dst_rect = rect_top
-        }
-        if (currentOutfit!!.category == "long_wears") {
-            dst_rect = rect_long
-        }
-        if (currentOutfit!!.category == "trousers") {
-            dst_rect = rect_trousers
-        }
-        if (currentOutfit!!.category == "shorts_n_skirts") {
-            dst_rect = rect_short
-        }
-        canvas.drawBitmap(outfit_bmp, null, dst_rect, null)
+        if (currentOutfit!!.category == "top") { dst_rect = rect_top }
+        if (currentOutfit!!.category == "long_wears") { dst_rect = rect_long }
+        if (currentOutfit!!.category == "trousers") { dst_rect = rect_trousers }
+        if (currentOutfit!!.category == "shorts_n_skirts") { dst_rect = rect_short }
+        canvas.drawBitmap(outfitBmp, null, dst_rect, null)
         Log.d(TAG, " points has been drawed")
     } //End onDraw
 
@@ -128,9 +95,7 @@ class DrawView : View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val width = MeasureSpec.getSize(widthMeasureSpec)
         val height = MeasureSpec.getSize(heightMeasureSpec)
-        if (mRatioWidth == 0 || mRatioHeight == 0) {
-            setMeasuredDimension(width, height)
-        } else {
+        if (mRatioWidth == 0 || mRatioHeight == 0)  setMeasuredDimension(width, height)  else {
             if (width < height * mRatioWidth / mRatioHeight) {
                 mWidth = width
                 mHeight = width * mRatioHeight / mRatioWidth
@@ -151,14 +116,6 @@ class DrawView : View {
     } //End onMeasure
 
     //Convert a dip value into a float
-    private fun dipToFloat(`val`: Float): Float {
-        return TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, `val`,
-            context.resources.displayMetrics
-        )
-    } //end dipToFloat
-
-    companion object {
-        var currentOutfit: Outfit? = null
-    }
+    private fun dipToFloat(value: Float): Float { return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, context.resources.displayMetrics) } //end dipToFloat
+    companion object { var currentOutfit: Outfit? = null }
 } //End class

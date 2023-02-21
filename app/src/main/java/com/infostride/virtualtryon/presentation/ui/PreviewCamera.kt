@@ -15,6 +15,7 @@ import android.util.Log
 import android.util.Size
 import android.view.*
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
 import com.infostride.virtualtryon.R
 import java.util.*
 import java.util.concurrent.Semaphore
@@ -24,10 +25,10 @@ import kotlin.math.max
 
 // TODO: 09/02/23 file need to update
 
-//class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallback
-class PreviewCamera: android.app.Fragment(), ActivityCompat.OnRequestPermissionsResultCallback
+class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallback
 {
    private val TAG = "C-PREVIEWMANAGER: " //log TAG
+    /** A shape for extracting frame data.   */
     private  val MAX_PREVIEW_WIDTH = 1920
     private val MAX_PREVIEW_HEIGHT = 1080
     private val HANDLE_THREAD_NAME = "CameraBackground"
@@ -39,17 +40,25 @@ class PreviewCamera: android.app.Fragment(), ActivityCompat.OnRequestPermissions
     private  var drawView: DrawView? = null //to place outfit on user
     private var classifier: Classifier? = null
     private  var imageReader: ImageReader? = null
+    /** The [android.util.Size] of camera preview.  */
     private  var previewSize: Size? = null
     private var cameraId: String? = null
     private var backgroundHandler: Handler? = null
     private var backgroundThread: HandlerThread? = null
     private  val cameraOpenCloseLock = Semaphore(1)
+    /** A [CameraCaptureSession] for camera preview.   */
     private var captureSession: CameraCaptureSession? = null
+    /** A reference to the opened [CameraDevice].    */
     private var cameraDevice: CameraDevice? = null
     private var previewRequestBuilder: CaptureRequest.Builder? = null
     private var previewRequest: CaptureRequest? = null
 
-
+    /****
+     * A TextureView can be used to display a content stream, such as that coming from a camera preview, a video, or an OpenGL scene.
+     * Unlike SurfaceView, TextureView does not create a separate window but behaves as a regular View.
+     * This key difference allows a TextureView to have translucency, arbitrary rotations, and complex clipping.
+     * For example, you can make a TextureView semi-translucent by calling myView.setAlpha(0.5f)
+     */
     private val surfaceTextureListener: TextureView.SurfaceTextureListener = object : TextureView.SurfaceTextureListener {
             override fun onSurfaceTextureAvailable(texture: SurfaceTexture, width: Int, height: Int) {
                 try {
@@ -83,17 +92,23 @@ class PreviewCamera: android.app.Fragment(), ActivityCompat.OnRequestPermissions
             cameraOpenCloseLock.release()
             camera.close()
             cameraDevice = null
-            val activity: Activity = activity
+            val activity: Activity = requireActivity()
             activity.finish()
         }
     } //end stateCallback
 
 
+
     val captureCallback: CameraCaptureSession.CaptureCallback = object : CameraCaptureSession.CaptureCallback() {
-            override fun onCaptureProgressed(session: CameraCaptureSession, request: CaptureRequest, partialResult: CaptureResult) {}
-            override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {}
+            override fun onCaptureProgressed(session: CameraCaptureSession, request: CaptureRequest, partialResult: CaptureResult) {
+                //testing
+            }
+            override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) { //testing
+             }
         }
-    //Create camera preview session
+    /**
+     * Creates a new [CameraCaptureSession] for camera preview.
+     */
     private fun createCameraPreviewSession() {
         try {
             val texture = autoFitTextureView!!.surfaceTexture
@@ -103,14 +118,16 @@ class PreviewCamera: android.app.Fragment(), ActivityCompat.OnRequestPermissions
             previewRequestBuilder!!.addTarget(surface)
 
             cameraDevice!!.createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
-                    override fun onConfigured(session: CameraCaptureSession) {
+                override fun onConfigured(session: CameraCaptureSession) {
                         if (cameraDevice == null) { return }
                         captureSession = session
                         try {
                             previewRequestBuilder!!.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
                             previewRequest = previewRequestBuilder!!.build()
                             captureSession!!.setRepeatingRequest(previewRequest!!, captureCallback, backgroundHandler)
-                        } catch (e: CameraAccessException) {}
+                        } catch (_: CameraAccessException) {
+                            //testing
+                        }
                     }
                 override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {} }, null) //End cameraDevice.createCaptureSession
                Log.d(TAG, " camera preview has started. . .")
@@ -126,7 +143,7 @@ class PreviewCamera: android.app.Fragment(), ActivityCompat.OnRequestPermissions
 
    override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        classifier = Classifier(activity)
+        classifier = Classifier(requireActivity())
         if (drawView != null) {
             drawView!!.setImgSize(classifier!!.imageSizeX, classifier!!.imageSizeY)
         }
@@ -202,13 +219,16 @@ class PreviewCamera: android.app.Fragment(), ActivityCompat.OnRequestPermissions
 
 
     //CAMERA MANIPULATION
-    ///////////////////////////    ///////////////////////////
+    /**
+     * Sets up member variables related to camera.
+     */
     private fun setUpCameraOutputs(width: Int, height: Int) {
-        val activity: Activity =activity
+        val activity: Activity =requireActivity()
         val manager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         try {
             for (cameraId in manager.cameraIdList) {
                 val characteristics = manager.getCameraCharacteristics(cameraId)
+                // We don't use a front facing camera in this sample.
                 val facing = characteristics.get(CameraCharacteristics.LENS_FACING)
                 if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) { continue }
                 val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP) ?: continue
@@ -241,14 +261,14 @@ class PreviewCamera: android.app.Fragment(), ActivityCompat.OnRequestPermissions
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     autoFitFrameLayout!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
                     autoFitTextureView!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
-                    drawView!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
+                   drawView!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
                 } else {
-                    autoFitFrameLayout!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
-                    autoFitTextureView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
-                    drawView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
+                   autoFitFrameLayout!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
+                   autoFitTextureView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
+                   drawView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
                 }
                 this.cameraId = cameraId
-                Log.d(TAG, " setUpCameraOutputs has successfull. . .")
+                Log.d(TAG, " setUpCameraOutputs has successfully. . .")
                 return
             }
         } //End try
@@ -266,7 +286,7 @@ class PreviewCamera: android.app.Fragment(), ActivityCompat.OnRequestPermissions
     private fun openCamera(width: Int, height: Int) {
         setUpCameraOutputs(width, height)
         configureTransform(width, height)
-        val activity: Activity = activity
+        val activity: Activity = requireActivity()
         val manager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         try {
             if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) { throw RuntimeException("Time out waiting to lock camera opening.") }
@@ -323,7 +343,7 @@ class PreviewCamera: android.app.Fragment(), ActivityCompat.OnRequestPermissions
     }
 
     private fun configureTransform(viewWidth: Int, viewHeight: Int) {
-        val activity: Activity = activity
+        val activity: Activity = requireActivity()
         if (autoFitTextureView == null || previewSize == null || activity == null) { return }
         val rotation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) activity.display?.rotation else activity.windowManager.defaultDisplay.rotation
         val matrix = Matrix()
@@ -340,14 +360,4 @@ class PreviewCamera: android.app.Fragment(), ActivityCompat.OnRequestPermissions
         } else if (rotation == Surface.ROTATION_180) matrix.postRotate(180f, centerX, centerY)
         autoFitTextureView!!.setTransform(matrix)
     } //End configureTransform
-
-    //create new PreviewManager instance
-
-
-    companion object{
-       fun newInstance(): PreviewCamera? {
-            return PreviewCamera()
-        }
-    }
-
 }//End Class
