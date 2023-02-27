@@ -4,6 +4,9 @@ import android.text.TextUtils
 import android.util.Log
 import com.infostride.virtualtryon.BuildConfig
 
+/****
+ * Created by poonam Rani on 23 Jan 2023
+ */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 object AppLog {
     enum class LogLevel(var displayName: String) { D("Debug"), V("Verbose"), E("Error"), I("Info"), W("Warn") }

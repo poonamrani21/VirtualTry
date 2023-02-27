@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 
 /**
- * Extension for smarter launching of Activities
+ * [launchActivity] Extension for smarter launching of Activities
  */
 inline fun <reified T : Activity> Context.launchActivity(
     noinline modify: Intent.() -> Unit = {}
@@ -24,10 +24,10 @@ inline fun <reified T : Activity> Context.launchActivity(
     startActivity(intent)
 }
 /**
- * Extension to get the file name
+ * [kotlinFileName] Extension to get the file name
  */
 inline val <T : Any> T.kotlinFileName: String
-    get() = javaClass.simpleName + ".kt"
+get() = javaClass.simpleName + ".kt"
 
 
 

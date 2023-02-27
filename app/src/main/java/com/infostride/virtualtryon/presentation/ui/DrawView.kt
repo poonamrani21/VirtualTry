@@ -6,7 +6,12 @@ import android.util.AttributeSet
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
+import com.infostride.virtualtryon.domain.model.Outfit
 
+
+/****
+ * Created by poonam on 23 Jan 2023
+ */
 class DrawView : View {
     private var mRatioWidth = 0
     private var mRatioHeight = 0
@@ -51,7 +56,7 @@ class DrawView : View {
 
     public override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (mDrawPoint.isEmpty()) {
+        if (mDrawPoint.isEmpty()|| currentOutfit==null) {
             Log.d(TAG, " mDrawPoint is NULL !!")
             return
         }

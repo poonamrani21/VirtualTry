@@ -15,15 +15,10 @@
     <string name="select_outfit">Select Outfit</string>
     <string name="upload_your_outfit">Upload Outfit</string>
 
-    <string-array name="men_costume_type">
-        <item>Tops</item>
-        <item>Long Wears</item>
-        <item>Trousers</item>
-        <item>Shorts</item>
-
-    </string-array>
-
     <string name="permission_required"> access is required to display the camera preview.</string>
     <string name="ok">OK</string>
     <string name="permission_granted">Permission is granted. You would use the camera now.</string>
+    <string name="apply">Apply</string>
+    <string name="select_outfit_by_user">Select Outfit</string>
+    <string name="unable_apply_outfit">Unable to apply outfit</string>
 </resources>
