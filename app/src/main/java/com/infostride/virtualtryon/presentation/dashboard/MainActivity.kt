@@ -53,4 +53,5 @@ class MainActivity : AppCompatActivity() {
             }
             else Log.i("Test Model -- ", "OpenCV initialize failed")
         } //End onResume
+
 }

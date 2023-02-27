@@ -61,7 +61,7 @@ class UploadUserCostumeActivity : AppCompatActivity() {
             popupMenu.setOnMenuItemClickListener { item: MenuItem ->
                 var category = ""
                 val title = item.title.toString()
-                if (title == "Tops") {
+                if (title == "Tops" || title =="Shirts") {
                     category = "top"
                 }
                 if (title == "Long Wears") {
@@ -70,10 +70,10 @@ class UploadUserCostumeActivity : AppCompatActivity() {
                 if (title == "Trousers") {
                     category = "trousers"
                 }
-                if (title == "Shorts and Skirts") {
+                if (title == "Shorts") {
                     category = "shorts_n_skirts"
                 }
-                if ((binding.imViewAddOutfit.drawable as BitmapDrawable).bitmap.height>1&&(binding.imViewAddOutfit.drawable as BitmapDrawable).bitmap.width>1){
+                if ((binding.imViewAddOutfit.drawable as BitmapDrawable).bitmap.height>10&&(binding.imViewAddOutfit.drawable as BitmapDrawable).bitmap.width>1){
                     val bmp = (binding.imViewAddOutfit.drawable as BitmapDrawable).bitmap
                     val stream = ByteArrayOutputStream()
                     bmp.compress(Bitmap.CompressFormat.PNG, 100, stream)

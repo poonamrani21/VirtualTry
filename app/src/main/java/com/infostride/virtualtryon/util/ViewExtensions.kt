@@ -1,11 +1,8 @@
 package com.infostride.virtualtryon.util
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
@@ -46,7 +43,7 @@ fun Context.showToast(message: String) { Toast.makeText(this, message, Toast.LEN
     return stream.toByteArray()
 }*/
 //convertImageToBitmap
-fun Context.convertImageToByteArray(image: Int): Bitmap {
+fun Context.convertDrawableToBitmap(image: Int): Bitmap {
     val largeIcon: Bitmap = BitmapFactory.decodeResource(resources, image)
     val stream = ByteArrayOutputStream()
     val processedBmp =  ImageProcessor().extractOutfit(largeIcon, 3)
@@ -62,12 +59,20 @@ fun Context.convertImageToByteArray(image: Int): Bitmap {
     processedBmp.compress(Bitmap.CompressFormat.JPEG, 100, stream)
     return stream.toByteArray()
 }*/
-fun getCategoryName(categoryName: String): String {
+fun getCategoryName(categoryName: String, genderType: String): String {
     var category:String?=null
-    if (categoryName == "Tops")  category = "top"
-    if (categoryName == "Long Wears")  category = "long_wears"
-    if (categoryName == "Trousers")  category = "trousers"
-    if (categoryName == "Shorts and Skirts")  category = "shorts_n_skirts"
+    if (genderType== Constant.men){
+        if (categoryName == "Shirts")  category = "top"
+        if (categoryName == "Long Wears")  category = "long_wears"
+        if (categoryName == "Trousers")  category = "trousers"
+        if (categoryName == "Shorts")  category = "shorts_n_skirts"
+    }else{
+        if (categoryName == "Tops")  category = "top"
+        if (categoryName == "Long Wears")  category = "long_wears"
+        if (categoryName == "Trousers")  category = "trousers"
+        if (categoryName == "Shorts and Skirts")  category = "shorts_n_skirts"
+    }
+
     return category!!
 
 }
