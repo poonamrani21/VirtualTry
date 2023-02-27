@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/menu_item_top"
-        android:title="Top" />
+        android:title="Tops" />
     <item
         android:id="@+id/menu_item_long_wears"
         android:title="Long Wears" />

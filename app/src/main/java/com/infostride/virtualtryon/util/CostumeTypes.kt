@@ -6,10 +6,10 @@ package com.infostride.virtualtryon.util
 // TODO: Need to make it correct
 enum class CostumeTypes(val dress: String) {
     WOMEN_TOPS("Tops"),
-    WOMEN_LONG_WEAR("Long Wear"),
+    WOMEN_LONG_WEAR("Long Wears"),
     WOMEN_TROUSERS("Trousers"),
-    WOMEN_SHORTS("Shorts"),
+    WOMEN_SHORTS("Shorts and Skirts")/*,
     MEN_SHIRTS("Shirts"),
     MEN_TROUSERS("Trousers"),
-    MEN_JEANS("Jeans")
+    MEN_JEANS("Jeans")*/
 }

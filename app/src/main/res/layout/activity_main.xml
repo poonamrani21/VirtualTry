@@ -11,12 +11,12 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <FrameLayout
+        <com.infostride.virtualtryon.presentation.ui.AutoFitFrameLayout
             android:id="@+id/autofitFrameLayout_fit_preview"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <TextureView
+            <com.infostride.virtualtryon.presentation.ui.AutoFitTextureView
                 android:id="@+id/autoFitTextureView_fit_preview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -25,7 +25,7 @@
                 android:id="@+id/drawView_fit_preview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-        </FrameLayout>
+        </com.infostride.virtualtryon.presentation.ui.AutoFitFrameLayout>
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/ll_select_outfit"
             android:orientation="horizontal"

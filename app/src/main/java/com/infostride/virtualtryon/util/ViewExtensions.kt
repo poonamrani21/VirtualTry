@@ -65,9 +65,9 @@ fun Context.convertImageToByteArray(image: Int): Bitmap {
 fun getCategoryName(categoryName: String): String {
     var category:String?=null
     if (categoryName == "Tops")  category = "top"
-    if (categoryName == "Long Wear")  category = "long_wears"
+    if (categoryName == "Long Wears")  category = "long_wears"
     if (categoryName == "Trousers")  category = "trousers"
-    if (categoryName == "Shorts")  category = "shorts_n_skirts"
+    if (categoryName == "Shorts and Skirts")  category = "shorts_n_skirts"
     return category!!
 
 }

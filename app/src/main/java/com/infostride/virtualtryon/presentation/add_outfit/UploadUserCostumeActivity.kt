@@ -16,8 +16,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.infostride.virtualtryon.R
 import com.infostride.virtualtryon.databinding.ActivityUploadUserOutfitBinding
-import com.infostride.virtualtryon.presentation.ui.DrawView
 import com.infostride.virtualtryon.domain.model.Outfit
+import com.infostride.virtualtryon.presentation.ui.DrawView
 import com.infostride.virtualtryon.util.*
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -61,7 +61,7 @@ class UploadUserCostumeActivity : AppCompatActivity() {
             popupMenu.setOnMenuItemClickListener { item: MenuItem ->
                 var category = ""
                 val title = item.title.toString()
-                if (title == "Top") {
+                if (title == "Tops") {
                     category = "top"
                 }
                 if (title == "Long Wears") {

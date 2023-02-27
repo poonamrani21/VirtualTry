@@ -3,6 +3,7 @@ package com.infostride.virtualtryon.presentation.ui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.*
 import android.hardware.camera2.*
 import android.media.ImageReader
@@ -53,8 +54,8 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
 
     private val lock = Any()
     private var runClassifier = false
-    private  var autoFitTextureView: TextureView? = null
-    private  var autoFitFrameLayout: FrameLayout? = null
+    private  var autoFitTextureView: AutoFitTextureView? = null
+    private  var autoFitFrameLayout: AutoFitFrameLayout? = null
     private  var drawView: DrawView? = null //to place outfit on user
     private var classifier: Classifier? = null
     private  var imageReader: ImageReader? = null
@@ -173,15 +174,15 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
          genderType = requireArguments().getString(Constant.GENDER_TYPE)!!
         return inflater.inflate(R.layout.activity_main, container, false) }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        autoFitFrameLayout = view.findViewById<View>(R.id.autofitFrameLayout_fit_preview) as FrameLayout
-        autoFitTextureView = view.findViewById<View>(R.id.autoFitTextureView_fit_preview) as TextureView
+        autoFitFrameLayout = view.findViewById<View>(R.id.autofitFrameLayout_fit_preview) as AutoFitFrameLayout
+        autoFitTextureView = view.findViewById<View>(R.id.autoFitTextureView_fit_preview) as AutoFitTextureView
         drawView = view.findViewById<View>(R.id.drawView_fit_preview) as DrawView
         rvCostumeType = view.findViewById<View>(R.id.rv_costume_type) as RecyclerView
         rvCostume = view.findViewById<View>(R.id.rv_costume) as RecyclerView
         btnUploadOutfit = view.findViewById<View>(R.id.btn_upload_outfit) as AppCompatButton
         outsideDetector = view.findViewById(R.id.outside_detector) as View
         llSelectOutfit = view.findViewById<View>(R.id.ll_select_outfit) as LinearLayoutCompat
-        showHideViewOverCameraView()
+       // showHideViewOverCameraView()
         setOnClickListeners()
         showCostumeList()
     }
@@ -303,16 +304,16 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
                 if (maxPreviewHeight > MAX_PREVIEW_HEIGHT) { maxPreviewHeight = MAX_PREVIEW_HEIGHT }
                 previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture::class.java), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest)
                 drawView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
-                /* val orientation: Int = resources.configuration.orientation
+                 val orientation: Int = resources.configuration.orientation
                  if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    // autoFitFrameLayout!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
-                    // autoFitTextureView!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
-                  //  drawView!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
+                     autoFitFrameLayout!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
+                     autoFitTextureView!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
+                   drawView!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
                  } else {
-                    //autoFitFrameLayout!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
-                  //  autoFitTextureView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
-                   // drawView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
-                 }*/
+                    autoFitFrameLayout!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
+                    autoFitTextureView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
+                    drawView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
+                 }
                 this.cameraId = cameraId
                 Log.d(TAG, " setUpCameraOutputs has successfully. . .")
                 return
@@ -478,9 +479,9 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
         val costumeTypeList = ArrayList<CostumeType>()
         when (genderType) {
             men -> {
-                costumeTypeList.add(CostumeType(1, CostumeTypes.MEN_TROUSERS.dress))
+                /*costumeTypeList.add(CostumeType(1, CostumeTypes.MEN_TROUSERS.dress))
                 costumeTypeList.add(CostumeType(2, CostumeTypes.MEN_SHIRTS.dress))
-                costumeTypeList.add(CostumeType(3, CostumeTypes.MEN_JEANS.dress))
+                costumeTypeList.add(CostumeType(3, CostumeTypes.MEN_JEANS.dress))*/
             }
             women -> {
                 costumeTypeList.add(CostumeType(1, CostumeTypes.WOMEN_TOPS.dress))
@@ -525,18 +526,17 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
                         costumeList.add(CostumeDetails(5, costumeType, R.drawable.women_dress1, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_dress1)))
                     }
                     Constant.women_long_wears -> {
-                        costumeList.add(CostumeDetails(1, costumeType, R.drawable.women_dress6, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_dress6)))
-                        costumeList.add(CostumeDetails(2, costumeType, R.drawable.women_dress2, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_dress2)))
+                        costumeList.add(CostumeDetails(1, costumeType, R.drawable.women_long_wear1, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_long_wear1)))
+                        costumeList.add(CostumeDetails(2, costumeType, R.drawable.women_long_wear2, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_long_wear2)))
                      }
                     Constant.women_trousers -> {
-                        costumeList.add(CostumeDetails(1, costumeType, R.drawable.women_dress2, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_dress2)))
-                        costumeList.add(CostumeDetails(2, costumeType, R.drawable.women_dress1, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_dress1)))
-                        costumeList.add(CostumeDetails(3, costumeType, R.drawable.women_dress6, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_dress6)))
+                        costumeList.add(CostumeDetails(1, costumeType, R.drawable.women_trouser1, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_trouser1)))
+                        costumeList.add(CostumeDetails(2, costumeType, R.drawable.women_trouser2, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_trouser2)))
                     }
                     Constant.women_shorts_n_skirts -> {
-                        costumeList.add(CostumeDetails(1, costumeType, R.drawable.women_dress2, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_dress2)))
-                        costumeList.add(CostumeDetails(2, costumeType, R.drawable.women_dress1, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_dress1)))
-                        costumeList.add(CostumeDetails(3, costumeType, R.drawable.women_dress6, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_dress6)))
+                        costumeList.add(CostumeDetails(1, costumeType, R.drawable.women_shorts1, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_shorts1)))
+                        costumeList.add(CostumeDetails(2, costumeType, R.drawable.women_shorts2, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_shorts2)))
+                        costumeList.add(CostumeDetails(3, costumeType, R.drawable.women_shorts3, getCategoryName(categoryName!!),requireActivity().convertImageToByteArray(R.drawable.women_shorts3)))
                     }
                 }
             }
