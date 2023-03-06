@@ -4,14 +4,14 @@
 
     <item
         android:id="@+id/menu_item_top"
-        android:title="Tops" />
+        android:title="@string/tops" />
     <item
         android:id="@+id/menu_item_long_wears"
-        android:title="Long Wears" />
+        android:title="@string/long_wears" />
     <item
         android:id="@+id/menu_item_trousers"
-        android:title="Trousers" />
+        android:title="@string/trousers" />
     <item
         android:id="@+id/menu_item_shorts"
-        android:title="Shorts and Skirts" />
+        android:title="@string/shorts_and_skirts" />
 </menu>

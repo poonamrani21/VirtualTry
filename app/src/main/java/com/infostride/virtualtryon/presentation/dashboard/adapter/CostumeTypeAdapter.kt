@@ -21,6 +21,7 @@ class CostumeTypeAdapter(private val listOfCostumeType: List<CostumeType>,privat
     override fun getItemCount(): Int { return  listOfCostumeType.size }
 
     override fun onBindViewHolder(holder: CostumerTypeViewHolder, position: Int) {
+        //Set data over views
        with( holder.binding){
            with(listOfCostumeType[position]){
                tvCostumeOption.text=type

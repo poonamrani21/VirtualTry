@@ -7,7 +7,9 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import com.infostride.virtualtryon.domain.model.Outfit
-
+/****
+ * Created by poonam on 23 Jan 2023
+ */
 class DrawView : View {
     private var mRatioWidth = 0
     private var mRatioHeight = 0
@@ -73,28 +75,32 @@ class DrawView : View {
         val top_right = (mDrawPoint[5].x + 60).toInt() //The X coordinate of the right side of the rectangle
         val top_bottom = (mDrawPoint[8].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
         val rect_top = Rect(top_left, top_top, top_right, top_bottom)//Coordinates to fit "LONG WEAR" outfit
+
         val long_left = (mDrawPoint[2].x - 60).toInt() //The X coordinate of the left side of the rectangle
         val long_top = (mDrawPoint[1].y - 10).toInt() //The Y coordinate of the top of the rectangle
         val long_right = (mDrawPoint[5].x + 60).toInt() //The X coordinate of the right side of the rectangle
         val long_bottom = (mDrawPoint[9].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
         val rect_long = Rect(long_left, long_top, long_right, long_bottom) //Coordinates to fit "TROUSERS" outfit
+
         val trousers_left = (mDrawPoint[8].x - 60).toInt() //The X coordinate of the left side of the rectangle
         val trousers_top = (mDrawPoint[8].y - 10).toInt() //The Y coordinate of the top of the rectangle
         val trousers_right = (mDrawPoint[11].x + 60).toInt() //The X coordinate of the right side of the rectangle
         val trousers_bottom = (mDrawPoint[10].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
         val rect_trousers = Rect(trousers_left, trousers_top, trousers_right, trousers_bottom) //Coordinates to fit "SHORTS N SKIRTS" outfit
+
         val short_left = (mDrawPoint[8].x - 60).toInt() //The X coordinate of the left side of the rectangle
         val short_top = (mDrawPoint[8].y - 10).toInt() //The Y coordinate of the top of the rectangle
         val short_right = (mDrawPoint[11].x + 60).toInt() //The X coordinate of the right side of the rectangle
         val short_bottom = (mDrawPoint[9].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
         val rect_short = Rect(short_left, short_top, short_right, short_bottom)
+
         var dst_rect = rect_top
         if (currentOutfit!!.category == "top") { dst_rect = rect_top }
         if (currentOutfit!!.category == "long_wears") { dst_rect = rect_long }
         if (currentOutfit!!.category == "trousers") { dst_rect = rect_trousers }
         if (currentOutfit!!.category == "shorts_n_skirts") { dst_rect = rect_short }
         canvas.drawBitmap(outfit_bmp, null, dst_rect, null)
-        Log.d(TAG, " points has been drawed")
+        Log.d(TAG, " points has been draw")
     } //End onDraw
 
     public override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

@@ -21,4 +21,12 @@
     <string name="apply">Apply</string>
     <string name="select_outfit_by_user">Select Outfit</string>
     <string name="unable_apply_outfit">Unable to apply outfit</string>
+    <string name="front_camera">Front Camera</string>
+    <string name="back_camera">Back Camera</string>
+    <string name="provide_camera_permission">Camera permissions are required to access the features. Kindly go to setting and provide required permissions.</string>
+    <string name="costume_applied">Costume Applied</string>
+    <string name="tops">Tops</string>
+    <string name="long_wears">Long Wears</string>
+    <string name="trousers">Trousers</string>
+    <string name="shorts_and_skirts">Shorts and Skirts</string>
 </resources>

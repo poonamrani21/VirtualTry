@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.infostride.virtualtryon.R
 import com.infostride.virtualtryon.databinding.ActivityMainBinding
 import com.infostride.virtualtryon.presentation.ui.PreviewCamera
+import com.infostride.virtualtryon.util.Constant.CAMERA_TYPE
 import com.infostride.virtualtryon.util.Constant.GENDER_TYPE
 import org.opencv.android.BaseLoaderCallback
 import org.opencv.android.LoaderCallbackInterface
@@ -36,7 +37,8 @@ class MainActivity : AppCompatActivity() {
         //Replace CameraPreview fragment
         intent?.also {
             val bundle = Bundle()
-            bundle.putString(GENDER_TYPE, intent.getStringExtra(GENDER_TYPE).toString())
+            bundle.putString(GENDER_TYPE, intent.getStringExtra(GENDER_TYPE))
+            bundle.putString(CAMERA_TYPE, intent.getStringExtra(CAMERA_TYPE))
              val previewCameraFragment= PreviewCamera()
             previewCameraFragment.arguments=bundle
             savedInstanceState ?: supportFragmentManager.beginTransaction().replace(R.id.FrameContainer_fit_preview, previewCameraFragment).commit()
