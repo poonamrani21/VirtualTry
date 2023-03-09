@@ -42,15 +42,17 @@ class UploadUserCostumeActivity : AppCompatActivity() {
         //set seekbar values
         setSeekbarValues()
         // set click listeners on views
-        setOnClickListeners()
+        onClickListeners()
 
     }
     private fun setSeekbarValues() {
         binding.sensitivityBarAddOutfit.max = 155
-        binding.sensitivityBarAddOutfit.min = 0
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            binding.sensitivityBarAddOutfit.min = 0
+        }
     }
 
-    private fun setOnClickListeners() {
+    private fun onClickListeners() {
         binding.buttonSearchGalleryAddOutfit.setOnClickListener{
             val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             resultLauncher.launch(intent)
@@ -79,7 +81,7 @@ class UploadUserCostumeActivity : AppCompatActivity() {
                     bmp.compress(Bitmap.CompressFormat.PNG, 100, stream)
                     val imgByte = stream.toByteArray()
                     DrawView.currentOutfit = Outfit( category = category, image = imgByte)
-                    showToast("Applied")
+                    showToast(getString(R.string.costume_applied))
                     finish()
                 }else showToast(getString(R.string.unable_apply_outfit))
                 false

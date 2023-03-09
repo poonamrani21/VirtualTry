@@ -2,6 +2,7 @@ package com.infostride.virtualtryon.presentation.ui
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.widget.FrameLayout
 
 class AutoFitFrameLayout : FrameLayout {
@@ -10,18 +11,14 @@ class AutoFitFrameLayout : FrameLayout {
 
     //Constructors
     constructor(context: Context?) : super(context!!) {}
-    constructor(context: Context?, attrs: AttributeSet?) : super(
-        context!!, attrs
-    )
-
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context!!, attrs, defStyleAttr
-    )
+    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs)
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context!!, attrs, defStyleAttr)
 
     fun setAspectRatio(width: Int, height: Int) {
         require(!(width < 0 || height < 0)) { "Size can not be negative" }
         mRatioWidth = width
         mRatioHeight = height
+        Log.d("AutoFitFrameLayout", "setAspectRatio Width: $width and Height: $height")
         requestLayout()
     } //end setAspectRatio
 
@@ -29,7 +26,7 @@ class AutoFitFrameLayout : FrameLayout {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val width = MeasureSpec.getSize(widthMeasureSpec)
         val height = MeasureSpec.getSize(heightMeasureSpec)
-        if (mRatioHeight == 0 || mRatioHeight == 0) {
+        if (mRatioWidth == 0 || mRatioHeight == 0) {
             setMeasuredDimension(width, height)
         } else {
             if (width < height * mRatioWidth / mRatioHeight) {

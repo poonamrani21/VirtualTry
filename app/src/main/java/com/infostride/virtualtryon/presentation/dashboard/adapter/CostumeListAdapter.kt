@@ -28,6 +28,7 @@ class CostumeListAdapter(private val costumeList:ArrayList<CostumeDetails>,priva
     }
 
     override fun onBindViewHolder(holder: CostumeViewListViewHolder, position: Int) {
+        //Set data over views
        with(holder.binding){
         with(costumeList[position]){
             val processor = ImageProcessor()

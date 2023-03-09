@@ -9,15 +9,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <RelativeLayout
+        android:id="@+id/ll_select_outfit"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <com.infostride.virtualtryon.presentation.ui.AutoFitFrameLayout
+            android:layout_centerVertical="true"
             android:id="@+id/autofitFrameLayout_fit_preview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <com.infostride.virtualtryon.presentation.ui.AutoFitTextureView
                 android:id="@+id/autoFitTextureView_fit_preview"
+                android:layout_centerVertical="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
@@ -25,9 +29,9 @@
                 android:id="@+id/drawView_fit_preview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
+
         </com.infostride.virtualtryon.presentation.ui.AutoFitFrameLayout>
         <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/ll_select_outfit"
             android:orientation="horizontal"
             android:weightSum="3"
             android:layout_width="match_parent"
@@ -44,7 +48,6 @@
                     android:layout_height="match_parent">
 
                     <TextView
-
                         android:id="@+id/tv_outfit_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -65,13 +68,12 @@
                         tools:listitem="@layout/costumer_option_item_layout" />
 
                     <androidx.appcompat.widget.AppCompatButton
-
                         android:id="@+id/btn_upload_outfit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="#9C9292"
+                        android:background="@color/white"
                         android:text="@string/select_outfit"
-                        android:textColor="@color/white"
+                        android:textColor="@color/black"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -83,15 +85,17 @@
 
             <View
 
+                android:contentDescription="@string/app_name"
                 android:id="@+id/outside_detector"
                 android:layout_width="0dp"
                 android:layout_weight="2"
                 android:layout_height="match_parent"
                 android:clickable="true"
                 android:focusable="true"/>
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_costume"
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:contentDescription="@string/app_name"
+                android:id="@+id/rv_costume"
                 android:layout_width="0dp"
                 android:layout_weight="0.5"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -99,7 +103,6 @@
                 android:layout_height="match_parent"/>
 
         </androidx.appcompat.widget.LinearLayoutCompat>
-
 
     </RelativeLayout>
 
