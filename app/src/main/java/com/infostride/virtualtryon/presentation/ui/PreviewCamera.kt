@@ -14,20 +14,38 @@ import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
 import android.view.*
+import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleObserver
+import androidx.recyclerview.widget.RecyclerView
 import com.infostride.virtualtryon.R
+import com.infostride.virtualtryon.domain.model.CostumeDetails
+import com.infostride.virtualtryon.domain.model.CostumeType
+import com.infostride.virtualtryon.domain.model.Outfit
+import com.infostride.virtualtryon.presentation.add_outfit.UploadUserCostumeActivity
+import com.infostride.virtualtryon.presentation.dashboard.adapter.CostumeListAdapter
+import com.infostride.virtualtryon.presentation.dashboard.adapter.CostumeTypeAdapter
+import com.infostride.virtualtryon.util.*
+import com.infostride.virtualtryon.util.Constant.men
+import com.infostride.virtualtryon.util.Constant.women
+import java.io.ByteArrayOutputStream
 import java.util.*
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
+/****
+ * Created by poonam Rani on 23 Jan 2023
+ */
 
-// TODO: 09/02/23 file need to update
+// TODO: need to make this class correct
 
-class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallback
-{
-   private val TAG = "C-PREVIEWMANAGER: " //log TAG
+class PreviewCamera : Fragment(), ActivityCompat.OnRequestPermissionsResultCallback,
+    LifecycleObserver {
+    private val TAG = "C-PREVIEWMANAGER: " //log TAG
+
     /** A shape for extracting frame data.   */
     private  val MAX_PREVIEW_WIDTH = 1920
     private val MAX_PREVIEW_HEIGHT = 1080
@@ -35,23 +53,42 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
 
     private val lock = Any()
     private var runClassifier = false
-    private  var autoFitTextureView: AutoFitTextureView? = null
-    private  var autoFitFrameLayout: AutoFitFrameLayout? = null
-    private  var drawView: DrawView? = null //to place outfit on user
+    private var autoFitTextureView: AutoFitTextureView? = null
+    private var autoFitFrameLayout: AutoFitFrameLayout? = null
+    private var drawView: DrawView? = null //to place outfit on user
     private var classifier: Classifier? = null
-    private  var imageReader: ImageReader? = null
+    private var imageReader: ImageReader? = null
+
     /** The [android.util.Size] of camera preview.  */
-    private  var previewSize: Size? = null
+    private var previewSize: Size? = null
     private var cameraId: String? = null
     private var backgroundHandler: Handler? = null
     private var backgroundThread: HandlerThread? = null
-    private  val cameraOpenCloseLock = Semaphore(1)
+    private val cameraOpenCloseLock = Semaphore(1)
+
     /** A [CameraCaptureSession] for camera preview.   */
     private var captureSession: CameraCaptureSession? = null
+
     /** A reference to the opened [CameraDevice].    */
     private var cameraDevice: CameraDevice? = null
     private var previewRequestBuilder: CaptureRequest.Builder? = null
     private var previewRequest: CaptureRequest? = null
+
+    //Views instance to show over screen
+    private lateinit var costumeListAdapter: CostumeListAdapter
+    private lateinit var costumeTypeAdapter: CostumeTypeAdapter
+    private lateinit var costumeList: ArrayList<CostumeDetails>
+
+    // TODO: need to  update the costumeType value
+    private var costumeType = 1//for type
+    private lateinit var genderType: String
+
+    private var categoryName: String? = null
+    private lateinit var rvCostume: RecyclerView
+    private lateinit var rvCostumeType: RecyclerView
+    private lateinit var outsideDetector: View
+    private lateinit var btnUploadOutfit: AppCompatButton
+    private lateinit var llSelectOutfit: LinearLayoutCompat
 
     /****
      * A TextureView can be used to display a content stream, such as that coming from a camera preview, a video, or an OpenGL scene.
@@ -59,22 +96,39 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
      * This key difference allows a TextureView to have translucency, arbitrary rotations, and complex clipping.
      * For example, you can make a TextureView semi-translucent by calling myView.setAlpha(0.5f)
      */
-    private val surfaceTextureListener: TextureView.SurfaceTextureListener = object : TextureView.SurfaceTextureListener {
-            override fun onSurfaceTextureAvailable(texture: SurfaceTexture, width: Int, height: Int) {
+    private val surfaceTextureListener: TextureView.SurfaceTextureListener =
+        object : TextureView.SurfaceTextureListener {
+            override fun onSurfaceTextureAvailable(
+                texture: SurfaceTexture, width: Int, height: Int
+            ) {
                 try {
                     openCamera(width, height)
                     Log.d(TAG, " camera has opened. . .")
-                } catch (e: CameraAccessException) { Log.d(TAG, " camera can not opened ![STL]") }
+                } catch (e: CameraAccessException) {
+                    Log.d(TAG, " camera can not opened ![STL]")
+                }
             }
 
-            override fun onSurfaceTextureSizeChanged(texture: SurfaceTexture, width: Int, height: Int) { configureTransform(width, height) }
+            override fun onSurfaceTextureSizeChanged(
+                texture: SurfaceTexture, width: Int, height: Int
+            ) {
+                configureTransform(width, height)
+            }
 
-            override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean { return true }
+            override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
+                return true
+            }
 
-            override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {}
-        } //end surfaceTextureListener
+            override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {
+                Log.d(TAG, "onSurfaceTextureUpdated: ")
+            }
+        }
 
-
+    /***
+     * [stateCallback] updates include notifications about the device completing startup
+     * ( allowing for createCaptureSession to be called),
+     * about device disconnection or closure, and about unexpected device errors states.
+     */
     private val stateCallback: CameraDevice.StateCallback = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
             cameraOpenCloseLock.release()
@@ -95,17 +149,26 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
             val activity: Activity = requireActivity()
             activity.finish()
         }
-    } //end stateCallback
+    }
 
-
-
-    val captureCallback: CameraCaptureSession.CaptureCallback = object : CameraCaptureSession.CaptureCallback() {
-            override fun onCaptureProgressed(session: CameraCaptureSession, request: CaptureRequest, partialResult: CaptureResult) {
-                //testing
+    /***
+     * [captureCallback] is providing a set of target output surfaces to createCaptureSession,
+     * or by providing an android.hardware.camera2.params.InputConfiguration and
+     * a set of target output surfaces to createReprocessableCaptureSession for a reprocessable capture session.
+     */
+    val captureCallback: CameraCaptureSession.CaptureCallback =
+        object : CameraCaptureSession.CaptureCallback() {
+            override fun onCaptureProgressed(
+                session: CameraCaptureSession, request: CaptureRequest, partialResult: CaptureResult
+            ) { //testing
             }
-            override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) { //testing
-             }
+
+            override fun onCaptureCompleted(
+                session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult
+            ) { //testing
+            }
         }
+
     /**
      * Creates a new [CameraCaptureSession] for camera preview.
      */
@@ -114,34 +177,66 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
             val texture = autoFitTextureView!!.surfaceTexture
             texture!!.setDefaultBufferSize(previewSize!!.width, previewSize!!.height)
             val surface = Surface(texture)
-            previewRequestBuilder = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+            previewRequestBuilder =
+                cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
             previewRequestBuilder!!.addTarget(surface)
 
-            cameraDevice!!.createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
-                override fun onConfigured(session: CameraCaptureSession) {
-                        if (cameraDevice == null) { return }
+            cameraDevice!!.createCaptureSession(
+                listOf(surface), object : CameraCaptureSession.StateCallback() {
+                    override fun onConfigured(session: CameraCaptureSession) {
+                        if (cameraDevice == null) {
+                            return
+                        }
                         captureSession = session
                         try {
-                            previewRequestBuilder!!.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                            previewRequestBuilder!!.set(
+                                CaptureRequest.CONTROL_AF_MODE,
+                                CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
+                            )
                             previewRequest = previewRequestBuilder!!.build()
-                            captureSession!!.setRepeatingRequest(previewRequest!!, captureCallback, backgroundHandler)
+                            captureSession!!.setRepeatingRequest(
+                                previewRequest!!, captureCallback, backgroundHandler
+                            )
                         } catch (_: CameraAccessException) {
                             //testing
                         }
                     }
-                override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {} }, null) //End cameraDevice.createCaptureSession
-               Log.d(TAG, " camera preview has started. . .")
-        } catch (e: CameraAccessException) { Log.d(TAG, " preview session can not be created! [Camera Access Exception]") } //End catch block
+
+                    override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
+                        Log.d(TAG, "onConfigureFailed: ")
+                    }
+                }, null
+            ) //End cameraDevice.createCaptureSession
+            Log.d(TAG, " camera preview has started. . .")
+        } catch (e: CameraAccessException) {
+            Log.d(TAG, " preview session can not be created! [Camera Access Exception]")
+        } //End catch block
     } //End createCameraPreviewSession
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? { return inflater.inflate(R.layout.activity_main, container, false) }
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        autoFitFrameLayout = view.findViewById<View>(R.id.autofitFrameLayout_fit_preview) as AutoFitFrameLayout
-        autoFitTextureView = view.findViewById<View>(R.id.autoFitTextureView_fit_preview) as AutoFitTextureView
-        drawView = view.findViewById<View>(R.id.drawView_fit_preview) as DrawView
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? {
+        genderType = requireArguments().getString(Constant.GENDER_TYPE)!!
+        return inflater.inflate(R.layout.activity_main, container, false)
     }
 
-   override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        autoFitFrameLayout =
+            view.findViewById<View>(R.id.autofitFrameLayout_fit_preview) as AutoFitFrameLayout
+        autoFitTextureView =
+            view.findViewById<View>(R.id.autoFitTextureView_fit_preview) as AutoFitTextureView
+        drawView = view.findViewById<View>(R.id.drawView_fit_preview) as DrawView
+        rvCostumeType = view.findViewById<View>(R.id.rv_costume_type) as RecyclerView
+        rvCostume = view.findViewById<View>(R.id.rv_costume) as RecyclerView
+        btnUploadOutfit = view.findViewById<View>(R.id.btn_upload_outfit) as AppCompatButton
+        outsideDetector = view.findViewById(R.id.outside_detector) as View
+        llSelectOutfit = view.findViewById<View>(R.id.ll_select_outfit) as LinearLayoutCompat
+        // showHideViewOverCameraView()
+        setOnClickListeners()
+        showCostumeList()
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         classifier = Classifier(requireActivity())
         if (drawView != null) {
@@ -151,12 +246,17 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
         startBackgroundThread()
     }
 
-   override fun onResume() {
+    override fun onResume() {
         super.onResume()
         startBackgroundThread()
-         if (autoFitTextureView!!.isAvailable) try { openCamera(autoFitTextureView!!.width, autoFitTextureView!!.height) } catch (e: CameraAccessException) { Log.d(TAG, " camera can not be opened [CameraAccessException]") }
-         else autoFitTextureView!!.surfaceTextureListener = surfaceTextureListener
+        if (autoFitTextureView!!.isAvailable) try {
+            openCamera(autoFitTextureView!!.width, autoFitTextureView!!.height)
+        } catch (e: CameraAccessException) {
+            Log.d(TAG, " camera can not be opened [CameraAccessException]")
+        }
+        else autoFitTextureView!!.surfaceTextureListener = surfaceTextureListener
     }
+
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
@@ -165,15 +265,20 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
 
     override fun onDestroy() {
         classifier!!.close()
+        DrawView.currentOutfit =null
         super.onDestroy()
     }
 
 
     //Classification
-    ///////////////////////////7///////////////////////
+    //////////////////////////////////////////////////
     private val periodicClassify: Runnable = object : Runnable {
         override fun run() {
-            synchronized(lock) { if (runClassifier) { classifyFrame() } }
+            synchronized(lock) {
+                if (runClassifier) {
+                    classifyFrame()
+                }
+            }
             backgroundHandler!!.post(this)
         }
     }
@@ -184,7 +289,8 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
             Log.d(TAG, " frame can not be classified due to null element(s) !")
             return
         } else {
-            val bmp = autoFitTextureView!!.getBitmap(classifier!!.imageSizeX, classifier!!.imageSizeY)
+            val bmp =
+                autoFitTextureView!!.getBitmap(classifier!!.imageSizeX, classifier!!.imageSizeY)
             classifier!!.classifyFrame(bmp!!)
             bmp.recycle()
             drawView!!.setDrawPoint(classifier!!.mPrintPointArray!!, 0.5f)
@@ -223,23 +329,36 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
      * Sets up member variables related to camera.
      */
     private fun setUpCameraOutputs(width: Int, height: Int) {
-        val activity: Activity =requireActivity()
+        val activity: Activity = requireActivity()
         val manager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         try {
             for (cameraId in manager.cameraIdList) {
                 val characteristics = manager.getCameraCharacteristics(cameraId)
                 // We don't use a front facing camera in this sample.
                 val facing = characteristics.get(CameraCharacteristics.LENS_FACING)
-                if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) { continue }
-                val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP) ?: continue
-                val largest = Collections.max(listOf(*map.getOutputSizes(ImageFormat.JPEG)), CompareSizesByArea())
-                imageReader = ImageReader.newInstance(largest.width, largest.height, ImageFormat.JPEG, 2)
-                val displayRotation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) activity.display?.rotation else activity.windowManager.defaultDisplay.rotation
-                val sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
+                if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
+                    continue
+                }
+                val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                    ?: continue
+                val largest = Collections.max(
+                    listOf(*map.getOutputSizes(ImageFormat.JPEG)), CompareSizesByArea()
+                )
+                imageReader =
+                    ImageReader.newInstance(largest.width, largest.height, ImageFormat.JPEG, 2)
+                val displayRotation =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                        activity.display?.rotation else activity.windowManager.defaultDisplay.rotation
+                val sensorOrientation =
+                    characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
                 var swappedDimensions = false
                 when (displayRotation) {
-                    Surface.ROTATION_0, Surface.ROTATION_180 -> if (sensorOrientation == 90 || sensorOrientation == 270) { swappedDimensions = true }
-                    Surface.ROTATION_90, Surface.ROTATION_270 -> if (sensorOrientation == 0 || sensorOrientation == 180) { swappedDimensions = true }
+                    Surface.ROTATION_0, Surface.ROTATION_180 -> if (sensorOrientation == 90 || sensorOrientation == 270) {
+                        swappedDimensions = true
+                    }
+                    Surface.ROTATION_90, Surface.ROTATION_270 -> if (sensorOrientation == 0 || sensorOrientation == 180) {
+                        swappedDimensions = true
+                    }
                     else -> Log.d(TAG, " display rotation is invalid ! [$displayRotation]")
                 }
                 val displaySize = Point()
@@ -254,18 +373,22 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
                     maxPreviewWidth = displaySize.y
                     maxPreviewHeight = displaySize.x
                 }
-                if (maxPreviewWidth > MAX_PREVIEW_WIDTH) { maxPreviewWidth = MAX_PREVIEW_WIDTH }
-                if (maxPreviewHeight > MAX_PREVIEW_HEIGHT) { maxPreviewHeight = MAX_PREVIEW_HEIGHT }
-                previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture::class.java), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest)
+                if (maxPreviewWidth > MAX_PREVIEW_WIDTH) {
+                    maxPreviewWidth = MAX_PREVIEW_WIDTH
+                }
+                if (maxPreviewHeight > MAX_PREVIEW_HEIGHT) {
+                    maxPreviewHeight = MAX_PREVIEW_HEIGHT
+                }
+                previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture::class.java),rotatedPreviewWidth,rotatedPreviewHeight,maxPreviewWidth,maxPreviewHeight,largest)
                 val orientation: Int = resources.configuration.orientation
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     autoFitFrameLayout!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
                     autoFitTextureView!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
-                   drawView!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
+                    drawView!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
                 } else {
-                   autoFitFrameLayout!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
-                   autoFitTextureView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
-                   drawView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
+                    autoFitFrameLayout!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
+                    autoFitTextureView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
+                    drawView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
                 }
                 this.cameraId = cameraId
                 Log.d(TAG, " setUpCameraOutputs has successfully. . .")
@@ -289,9 +412,13 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
         val activity: Activity = requireActivity()
         val manager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         try {
-            if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) { throw RuntimeException("Time out waiting to lock camera opening.") }
+            if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
+                throw RuntimeException("Time out waiting to lock camera opening.")
+            }
             manager.openCamera(cameraId!!, stateCallback, backgroundHandler)
-        } catch (e: InterruptedException) { throw RuntimeException("Interrupted while trying to lock camera opening.", e)}
+        } catch (e: InterruptedException) {
+            throw RuntimeException("Interrupted while trying to lock camera opening.", e)
+        }
         Log.d(TAG, " camera has opened successfully. . .")
     }
 
@@ -311,17 +438,31 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
                 imageReader = null
             }
             Log.d(TAG, " camera has closed successfully...")
-        } catch (e: InterruptedException) { throw RuntimeException("Interrupted while trying to lock camera closing.", e) } finally { cameraOpenCloseLock.release() }
+        } catch (e: InterruptedException) {
+            throw RuntimeException("Interrupted while trying to lock camera closing.", e)
+        } finally {
+            cameraOpenCloseLock.release()
+        }
     }
 
-    private fun chooseOptimalSize(choices: Array<Size>, textureViewWidth: Int, textureViewHeight: Int, maxWidth: Int, maxHeight: Int, aspectRatio: Size): Size? {
+    private fun chooseOptimalSize(
+        choices: Array<Size>,
+        textureViewWidth: Int,
+        textureViewHeight: Int,
+        maxWidth: Int,
+        maxHeight: Int,
+        aspectRatio: Size
+    ): Size? {
         val bigEnough = ArrayList<Size>()
         val notBigEnough = ArrayList<Size>()
         val w = aspectRatio.width
         val h = aspectRatio.height
         for (option in choices) {
             if (option.width <= maxWidth && option.height <= maxHeight && option.height == option.width * h / w) {
-                if (option.width >= textureViewWidth && option.height >= textureViewHeight) bigEnough.add(option) else notBigEnough.add(option)
+                if (option.width >= textureViewWidth && option.height >= textureViewHeight) bigEnough.add(
+                    option
+                )
+                else notBigEnough.add(option)
             } //end if
         } //end for loop
         if (bigEnough.size > 0) {
@@ -338,17 +479,24 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
     } //End chooseOptimalSize
 
 
-    private class CompareSizesByArea : Comparator<Size>{
-        override fun compare(o1: Size?, o2: Size?): Int { return java.lang.Long.signum((o1!!.width * o1.height - o2!!.width * o2.height).toLong()) }
+    private class CompareSizesByArea : Comparator<Size> {
+        override fun compare(o1: Size?, o2: Size?): Int {
+            return java.lang.Long.signum((o1!!.width * o1.height - o2!!.width * o2.height).toLong())
+        }
     }
 
     private fun configureTransform(viewWidth: Int, viewHeight: Int) {
         val activity: Activity = requireActivity()
-        if (autoFitTextureView == null || previewSize == null || activity == null) { return }
-        val rotation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) activity.display?.rotation else activity.windowManager.defaultDisplay.rotation
+        if (autoFitTextureView == null || previewSize == null || activity == null) {
+            return
+        }
+        val rotation =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) activity.display?.rotation
+            else activity.windowManager.defaultDisplay.rotation
         val matrix = Matrix()
         val viewRect = RectF(0f, 0f, viewWidth.toFloat(), viewHeight.toFloat())
-        val bufferRect = RectF(0f, 0f, previewSize!!.height.toFloat(), previewSize!!.width.toFloat())
+        val bufferRect =
+            RectF(0f, 0f, previewSize!!.height.toFloat(), previewSize!!.width.toFloat())
         val centerX = viewRect.centerX()
         val centerY = viewRect.centerY()
         if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
@@ -360,4 +508,150 @@ class PreviewCamera: Fragment(), ActivityCompat.OnRequestPermissionsResultCallba
         } else if (rotation == Surface.ROTATION_180) matrix.postRotate(180f, centerX, centerY)
         autoFitTextureView!!.setTransform(matrix)
     } //End configureTransform
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun showHideViewOverCameraView() {
+        llSelectOutfit.setOnTouchListener { _, motionEvent ->
+            when (motionEvent.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    if (rvCostume.visibility == View.VISIBLE) {
+                        requireActivity().showToast("Full Camera view will visible here")
+                        rvCostume.makeGone()
+                        llSelectOutfit.makeVisible()
+                    } else {
+                        requireActivity().showToast("Full Camera  view hidden")
+                        llSelectOutfit.makeVisible()
+                        rvCostume.makeVisible()
+                    }
+                }
+            }
+            true
+        }
+    }
+
+    /***
+     * [setOnClickListeners] for on click events
+     */
+    private fun setOnClickListeners() { btnUploadOutfit.setOnClickListener { requireActivity().launchActivity<UploadUserCostumeActivity>() } }
+
+    /***
+     * Show costume list as per selected gender
+     */
+    private fun showCostumeList() {
+        val costumeTypeList = listOfCostumesType(genderType)
+        categoryName = costumeTypeList[0].type
+        listOfCostumes(costumeType, genderType)
+        costumeTypeAdapter = CostumeTypeAdapter(costumeTypeList) {
+            if (costumeType != it.id) {
+                costumeType = it.id
+                categoryName = it.type
+                updateCostumeList()
+                DrawView.currentOutfit =null
+            }
+        }
+        rvCostumeType.adapter = costumeTypeAdapter
+        costumeListAdapter = CostumeListAdapter(costumeList) { it, bitmapInstance ->
+            ImageProcessor().extractOutfit(bitmapInstance, 15)
+            val stream = ByteArrayOutputStream()
+            bitmapInstance.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val imgByte = stream.toByteArray()
+            DrawView.currentOutfit = Outfit(category = it.category, image = imgByte)
+            applyCostumeToModel()
+        }
+        rvCostume.adapter = costumeListAdapter
+    }
+
+    private fun applyCostumeToModel() { requireActivity().showToast("Costume Applied") }
+
+    /***
+     * [updateCostumeList] will update
+     */
+    @SuppressLint("NotifyDataSetChanged")
+    private fun updateCostumeList() {
+        costumeList.clear()
+        listOfCostumes(costumeType, genderType)
+        costumeListAdapter.notifyDataSetChanged()
+        requireActivity().showToast("List updated: Costume type is: $costumeType and costume list size is: ${costumeList.size}")
+    }
+
+    /***
+     * [listOfCostumesType] will get types of costume as per [genderType] -> 1 for [women] and 2 -> for [men]
+     */
+    private fun listOfCostumesType(genderType: String?): List<CostumeType> {
+        val costumeTypeList = ArrayList<CostumeType>()
+        when (genderType) {
+            men -> {
+                costumeTypeList.add(CostumeType(1, CostumeTypes.MEN_SHIRTS.dress))
+                costumeTypeList.add(CostumeType(2, CostumeTypes.MEN_LONG_WEAR.dress))
+                costumeTypeList.add(CostumeType(3, CostumeTypes.MEN_TROUSERS.dress))
+                costumeTypeList.add(CostumeType(4, CostumeTypes.MEN_SHORTS.dress))
+            }
+            women -> {
+                costumeTypeList.add(CostumeType(1, CostumeTypes.WOMEN_TOPS.dress))
+                costumeTypeList.add(CostumeType(2, CostumeTypes.WOMEN_LONG_WEAR.dress))
+                costumeTypeList.add(CostumeType(3, CostumeTypes.WOMEN_TROUSERS.dress))
+                costumeTypeList.add(CostumeType(4, CostumeTypes.WOMEN_SHORTS.dress))
+            }
+        }
+        return costumeTypeList
+    }
+
+    /**
+     * [listOfCostumes] will get list of costumes as per [costumeType] and [genderType]
+     * [costumeType] -> will get types from [CostumeTypes]
+     * [genderType] -> 1 for [women] and 2 -> for [men]
+     */
+    private fun listOfCostumes(costumeType: Int, genderType: String?): ArrayList<CostumeDetails> {
+        when (genderType) {
+            men -> {
+                when (costumeType) {
+                    Constant.men_shirts -> {
+                        costumeList.add(CostumeDetails(1, costumeType, getCategoryName(categoryName!!,genderType), requireActivity().convertDrawableToBitmap(R.drawable.mens_shirt1)))
+                        costumeList.add(CostumeDetails(1, costumeType, getCategoryName(categoryName!!,genderType), requireActivity().convertDrawableToBitmap(R.drawable.mens_shirt2)))
+                    }
+                    Constant.men_long_wears -> {
+                        costumeList.add(CostumeDetails(1, costumeType,  getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.mens_long_wear1)))
+                    }
+                    Constant.men_trousers -> {
+                        costumeList.add(CostumeDetails(1, costumeType,  getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.mens_trouser1)))
+                        costumeList.add(CostumeDetails(2, costumeType,  getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.mens_jean1)))
+                        costumeList.add(CostumeDetails(3, costumeType,  getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.mens_jean2)))
+                    }
+                    Constant.men_shorts -> {
+                        costumeList.add(CostumeDetails(1, costumeType, getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.mens_shorts1)))
+                        costumeList.add(CostumeDetails(2, costumeType, getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.mens_shorts2)))
+                    }
+                }
+            }
+            women -> {
+                when (costumeType) {
+                    Constant.women_top -> {
+                        costumeList.add(CostumeDetails(1, costumeType,  getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.women_dress1)))
+                        costumeList.add(CostumeDetails(2, costumeType, getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.women_top2)))
+                        costumeList.add(CostumeDetails(3, costumeType,  getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.women_top3)))
+                        costumeList.add(CostumeDetails(4, costumeType,  getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.women_dress2)))
+                    }
+                    Constant.women_long_wears -> {
+                        costumeList.add(CostumeDetails(1, costumeType, getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.women_long_wear1)))
+                        costumeList.add(CostumeDetails(2, costumeType, getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.women_long_wear2)))
+                    }
+                    Constant.women_trousers -> {
+                        costumeList.add(CostumeDetails(1, costumeType, getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.women_trouser1)))
+                        costumeList.add(CostumeDetails(2, costumeType, getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.women_trouser2)))
+                    }
+                    Constant.women_shorts_n_skirts -> {
+                        costumeList.add(CostumeDetails(1, costumeType, getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.women_shorts1)))
+                        costumeList.add(CostumeDetails(2, costumeType,  getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.women_shorts2)))
+                        costumeList.add(CostumeDetails(3, costumeType,  getCategoryName(categoryName!!, genderType), requireActivity().convertDrawableToBitmap(R.drawable.mens_shorts2)))
+                    }
+                }
+            }
+        }
+        return costumeList
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        costumeList = ArrayList()
+    }
 }//End Class

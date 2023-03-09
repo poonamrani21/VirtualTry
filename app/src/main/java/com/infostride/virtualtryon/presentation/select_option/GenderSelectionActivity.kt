@@ -18,10 +18,11 @@ import com.infostride.virtualtryon.util.Constant.GENDER_TYPE
 import com.infostride.virtualtryon.util.Constant.men
 import com.infostride.virtualtryon.util.Constant.women
 
+/****
+ * Created by poonam on 23 Jan 2023
+ */
 class GenderSelectionActivity : AppCompatActivity() {
-    /****
-     * Created by poonam Rani on 23 Jan 2023
-     */
+
     private lateinit var binding: ActivityGenderSelectionBinding
     private lateinit var layout: View
     private val permissionArray= arrayOf(Manifest.permission.CAMERA,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE)

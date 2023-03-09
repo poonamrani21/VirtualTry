@@ -15,6 +15,10 @@ import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
+/****
+ * Created by poonam on 23 Jan 2023
+ */
+// TODO: Need to make this class correct
 class Classifier(activity: Activity) {
     //Constant variables
     private val DIM_BATCH_SIZE = 1

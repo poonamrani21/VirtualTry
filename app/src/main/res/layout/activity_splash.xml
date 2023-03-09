@@ -7,6 +7,7 @@
     tools:context=".presentation.splash.SplashActivity">
 
     <ImageView
+        android:contentDescription="@string/app_name"
         android:id="@+id/imageView"
         android:layout_width="190dp"
         android:layout_height="190dp"
@@ -17,6 +18,7 @@
         app:srcCompat="@drawable/ic_app_logo" />
 
     <TextView
+        android:textColorHint="@color/app_theme"
         android:textSize="20sp"
         android:textColor="@color/app_theme"
         android:layout_marginTop="25dp"

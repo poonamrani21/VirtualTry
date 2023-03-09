@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/layout_add_outfit"
+    tools:context=".presentation.add_outfit.UploadUserCostumeActivity">
+    <ImageView
+        android:contentDescription="@string/app_name"
+        android:id="@+id/imView_add_outfit"
+        android:layout_width="match_parent"
+        android:layout_height="480dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="87dp"
+        android:background="@android:color/black" />
+
+    <Button
+        android:id="@+id/button_searchGallery_add_outfit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="24dp"
+        android:text="@string/select_outfit_by_user" />
+
+    <Button
+        android:id="@+id/button_insert_add_outfit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/button_searchGallery_add_outfit"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="24dp"
+        android:text="@string/apply"
+        android:visibility="gone" />
+
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:id="@+id/sensitivity_bar_add_outfit"
+        android:layout_width="229dp"
+        android:layout_height="15dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="136dp"
+        android:layout_marginEnd="17dp"
+        android:layout_marginBottom="44dp"
+        android:background="@android:color/darker_gray"
+        android:visibility="gone" />
+</RelativeLayout>

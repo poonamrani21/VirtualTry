@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
+import com.infostride.virtualtryon.domain.model.Outfit
 
 class DrawView : View {
     private var mRatioWidth = 0
@@ -21,9 +22,14 @@ class DrawView : View {
     private val TAG = "C-DRAWVIEW: "
 
     //Constructors
-    constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    constructor(context: Context?) : super(context) {}
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
+    }
 
     fun setImgSize(width: Int, height: Int) {
         mImgWidth = width
@@ -51,21 +57,22 @@ class DrawView : View {
 
     public override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (mDrawPoint.isEmpty()) {
+        if (mDrawPoint.isEmpty() || currentOutfit==null) {
             Log.d(TAG, " mDrawPoint is NULL !!")
             return
         }
         mPaint.flags = Paint.ANTI_ALIAS_FLAG or Paint.DITHER_FLAG
         mPaint.style = Paint.Style.FILL
         mPaint.strokeWidth = dipToFloat(2f)
-        val outfitByteArray = currentOutfit!!.image
-        val outfitBmp = BitmapFactory.decodeByteArray(outfitByteArray, 0, outfitByteArray.size)
+        val outfit_byte_array = currentOutfit!!.image
+        val outfit_bmp = BitmapFactory.decodeByteArray(outfit_byte_array, 0, outfit_byte_array.size)
+
         //Coordinates to fit "TOP" outfit
         val top_left = (mDrawPoint[2].x - 60).toInt() //The X coordinate of the left side of the rectangle
         val top_top = (mDrawPoint[1].y - 10).toInt() //The Y coordinate of the top of the rectangle
         val top_right = (mDrawPoint[5].x + 60).toInt() //The X coordinate of the right side of the rectangle
         val top_bottom = (mDrawPoint[8].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
-        val rect_top = Rect(top_left, top_top, top_right, top_bottom) //Coordinates to fit "LONG WEAR" outfit
+        val rect_top = Rect(top_left, top_top, top_right, top_bottom)//Coordinates to fit "LONG WEAR" outfit
         val long_left = (mDrawPoint[2].x - 60).toInt() //The X coordinate of the left side of the rectangle
         val long_top = (mDrawPoint[1].y - 10).toInt() //The Y coordinate of the top of the rectangle
         val long_right = (mDrawPoint[5].x + 60).toInt() //The X coordinate of the right side of the rectangle
@@ -81,13 +88,12 @@ class DrawView : View {
         val short_right = (mDrawPoint[11].x + 60).toInt() //The X coordinate of the right side of the rectangle
         val short_bottom = (mDrawPoint[9].y + 10).toInt() //The Y coordinate of the bottom of the rectangle
         val rect_short = Rect(short_left, short_top, short_right, short_bottom)
-
         var dst_rect = rect_top
         if (currentOutfit!!.category == "top") { dst_rect = rect_top }
         if (currentOutfit!!.category == "long_wears") { dst_rect = rect_long }
         if (currentOutfit!!.category == "trousers") { dst_rect = rect_trousers }
         if (currentOutfit!!.category == "shorts_n_skirts") { dst_rect = rect_short }
-        canvas.drawBitmap(outfitBmp, null, dst_rect, null)
+        canvas.drawBitmap(outfit_bmp, null, dst_rect, null)
         Log.d(TAG, " points has been drawed")
     } //End onDraw
 
@@ -95,7 +101,9 @@ class DrawView : View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val width = MeasureSpec.getSize(widthMeasureSpec)
         val height = MeasureSpec.getSize(heightMeasureSpec)
-        if (mRatioWidth == 0 || mRatioHeight == 0)  setMeasuredDimension(width, height)  else {
+        if (mRatioWidth == 0 || mRatioHeight == 0) {
+            setMeasuredDimension(width, height)
+        } else {
             if (width < height * mRatioWidth / mRatioHeight) {
                 mWidth = width
                 mHeight = width * mRatioHeight / mRatioWidth
